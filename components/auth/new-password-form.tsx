@@ -23,6 +23,7 @@ import { FormSuccess } from "@/components/form-success";
 import { useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 
+
 export const NewPasswordForm = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
