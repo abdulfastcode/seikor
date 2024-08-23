@@ -1,8 +1,18 @@
 import { z } from "zod"
 
-export const NewPasswordSchema = z.object({
-   password: z.string().min(6,{message:"Password is required and must be at least 6 characters"}),
-   })
+export const NewPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(6, { message: "Password is required and must be at least 6 characters" }),
+    reEnterPassword: z
+      .string()
+      .min(6, { message: "Reenter Password is required, must be same as above" }),
+  })
+  .refine((data) => data.password === data.reEnterPassword, {
+    message: "Passwords do not match",
+    path: ["reEnterPassword"], // This will attach the error message to the reEnterPassword field
+  });
 
 export const ResetSchema = z.object({
    email: z.string().email({message:"Email is required"}),

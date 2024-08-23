@@ -1,6 +1,9 @@
 "use client";
 import { CardWrapper } from "./card-wrapper";
 
+import { IoMdEye } from "react-icons/io";
+import { IoMdEyeOff } from "react-icons/io";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -25,8 +28,11 @@ import Link from "next/link";
 
 export const LoginForm = () => {
   const [transition, startTransition] = useTransition();
+
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const [showPassword, setShowPassword] = useState<boolean | undefined>();
+ 
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -83,12 +89,30 @@ export const LoginForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="******"
-                      disabled={transition}
-                      type="password"
-                    />
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        placeholder="******"
+                        disabled={transition}
+                        type={showPassword ? "text" : "password"}
+                         className="pr-[30px]"
+                      />
+                      <IoMdEye
+                        onClick={() => {
+                          setShowPassword(true);
+                        }}
+                        className="cursor-pointer absolute top-[10px] right-[13px]"
+                      />
+
+                      {showPassword && (
+                        <IoMdEyeOff
+                          onClick={() => {
+                            setShowPassword(false);
+                          }}
+                          className="cursor-pointer absolute top-[10px] right-[13px]"
+                        />
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                   <Button

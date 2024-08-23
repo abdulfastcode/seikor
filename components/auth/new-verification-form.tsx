@@ -1,7 +1,7 @@
 "use client";
 
 import { CardWrapper } from "@/components/auth/card-wrapper";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams,useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { BeatLoader } from "react-spinners";
 import { FormSuccess } from "../form-success";
@@ -12,6 +12,7 @@ export const NewVerificationForm = () => {
   const [success, setSuccess] = useState<string | undefined>();
 
   const searchParams = useSearchParams();
+  const route = useRouter();
 
   const token = searchParams.get("token");
 
@@ -24,6 +25,7 @@ export const NewVerificationForm = () => {
     console.log("token",token);
     // setSuccess when the token is available
     setSuccess("Verification successful.");
+    // route.push("/");
   }, [token]);
 
   useEffect(() => {
