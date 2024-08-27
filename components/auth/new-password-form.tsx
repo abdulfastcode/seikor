@@ -47,7 +47,7 @@ export const NewPasswordForm = () => {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof NewPasswordSchema>) => {
+  const onSubmit = async (data: z.infer<typeof NewPasswordSchema>) => {
     setSuccess("");
     setError("");
 
@@ -56,17 +56,51 @@ export const NewPasswordForm = () => {
       return;
     }
 
-    startTransition(() => {
-      console.log("userData", data);
-      // if (data.password !== data.reEnterPassword) {
-      //   setError("Passwords do not match");
-      //   return;
-      // }
-      console.log("Password Updated");
-      setSuccess("Password Updated!");
-      // axios.post("/...,values")
-    });
-  };
+   
+
+      // handle the OTP and redirect to the login page
+
+      const validateFields = NewPasswordSchema.safeParse(data);
+
+      if (!validateFields.success) {
+        return setError("Invalid fields");
+      }
+
+      // extracting fields from data
+      const { reEnterPassword } = validateFields.data;
+
+      try {
+        const response = await fetch(
+          "http://65.1.106.246:8000/api/reset-password",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              token: token,
+              new_password: reEnterPassword,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const resp = await response.json();
+          console.log("success response", resp);
+          setSuccess("Password reset Successful!");
+
+          // route to login
+          // route.push("/");
+        } else {
+          const errorData = await response.json();
+          setError(errorData.message || "Password Reset Failed!");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Something went wrong. Please try again.");
+      }
+    }
+  ;
 
   return (
     <CardWrapper

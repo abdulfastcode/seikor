@@ -8,6 +8,7 @@ import { FormSuccess } from "../form-success";
 import { FormError } from "../form-error";
 
 import { z } from "zod";
+import { RegisterSchema } from "@/schema";
 import { OtpSchema } from "@/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -63,11 +64,54 @@ export const NewVerificationForm = () => {
     onTokenCheck();
   }, [onTokenCheck]);
 
-  function onSubmit(OtpValues: z.infer<typeof OtpSchema>) {
-    console.log("OtpValues", OtpValues);
-
+  async function onSubmit(data: z.infer<typeof OtpSchema>) {
+    console.log("OTPdata", data);
+    setSuccessMessage("");
+    setError("");
     // handle the OTP and redirect to the login page
-    setSuccessMessage("OTP verified");
+
+    const validateFields = OtpSchema.safeParse(data);
+
+    if (!validateFields.success) {
+      return setError("Invalid fields");
+    }
+
+    // extracting fields from data
+    const { pin } = validateFields.data;
+
+    try {
+      const response = await fetch(
+        "http://65.1.106.246:8000/api/verify-login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: token,
+            otp: pin,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const resp = await response.json();
+        console.log("success response", resp);
+        setSuccessMessage("Verification successful!");
+        // store token in local storage
+        if (token) {
+          localStorage.setItem("token", token);
+        }
+        // route to dashboard
+        route.push("/user-info");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Verification failed!");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.");
+    }
   }
 
   return (

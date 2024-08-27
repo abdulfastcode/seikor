@@ -38,10 +38,44 @@ export const ResetForm = () => {
     setSuccess("");
     setError("");
 
-    startTransition(() => {
+    startTransition(async () => {
       console.log("userData", data);
-      setSuccess("Reset Email Sent!");
-      // axios.post("/...,values")
+      const validateFields = ResetSchema.safeParse(data);
+
+      if (!validateFields.success) {
+        return setError("Invalid fields");
+      }
+
+      // extracting fields from data
+      const { email } = validateFields.data;
+
+      try {
+        // Send data to the API using fetch
+        const response = await fetch(
+          "http://65.1.106.246:8000/api/password-reset-request",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: email,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const resp = await response.json();
+          console.log("success response", resp);
+          setSuccess("Password reset email sent, Please check your mail!");
+        } else {
+          const errorData = await response.json();
+          setError(errorData.message || "Fail to reset password request!");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Something went wrong. Please try again.");
+      }
     });
   };
 

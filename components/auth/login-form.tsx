@@ -8,6 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import bcrypt from "bcryptjs";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -32,7 +34,6 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [showPassword, setShowPassword] = useState<boolean | undefined>();
- 
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -46,10 +47,46 @@ export const LoginForm = () => {
     setSuccess("");
     setError("");
 
-    startTransition(() => {
+    startTransition(async () => {
       console.log("userData", data);
-      setSuccess("Authentication Successfully");
-      // axios.post("/...,values")
+      const validateFields = LoginSchema.safeParse(data);
+      if (!validateFields.success) {
+        return setError("Invalid fields");
+      }
+
+      const { email, password } = validateFields.data;
+
+      try {
+        // Encrypt password
+        // const hashedPassword = await bcrypt.hash(password, 10);
+        // console.log(hashedPassword);
+
+        // Send data to the API using fetch
+        const response = await fetch("http://65.1.106.246:8000/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: email,
+            // password: hashedPassword,
+            password: password,
+          }),
+        });
+
+        if (response.ok) {
+          const resp = await response.json();
+          console.log("success response", resp);
+          setSuccess("Verification link sent, Please check you mail!");
+        } else {
+          const errorData = await response.json();
+          console.log("errorData", errorData);
+          setError(errorData.detail || "Failed to Login. Please try again.");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Something went wrong. Please try again.");
+      }
     });
   };
 
@@ -95,7 +132,7 @@ export const LoginForm = () => {
                         placeholder="******"
                         disabled={transition}
                         type={showPassword ? "text" : "password"}
-                         className="pr-[30px]"
+                        className="pr-[30px]"
                       />
                       <IoMdEye
                         onClick={() => {

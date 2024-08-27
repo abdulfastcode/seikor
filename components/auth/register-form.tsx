@@ -48,9 +48,8 @@ export const RegisterForm = () => {
     setSuccess("");
     setError("");
 
-    startTransition(() => {
+    startTransition(async () => {
       console.log("userData", data);
-      // axios.post("/...,values")
       const validateFields = RegisterSchema.safeParse(data);
 
       if (!validateFields.success) {
@@ -60,11 +59,43 @@ export const RegisterForm = () => {
       // extracting fields from data
       const { email, password, name } = validateFields.data;
 
-      // encrypt password
-      // const hashedPassword = await bcrypt.hash(password, 10);
-      // console.log(hashedPassword)
+      try {
+        // Encrypt password
+        // const hashedPassword = await bcrypt.hash(password, 10);
+        // console.log(hashedPassword);
 
-      return setSuccess("Confirmation Email Sent!");
+        // Send data to the API using fetch
+        const response = await fetch("http://65.1.106.246:8000/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_type: "admin",
+            email: email,
+            full_name: name,
+            // password: hashedPassword,
+            password: password,
+            phone: "string",
+            address: "string",
+          }),
+        });
+
+        if (response.ok) {
+          const resp = await response.json();
+          console.log("success response", resp);
+          setSuccess("Account crated Successful!");
+        } else {
+          const errorData = await response.json();
+          setError(
+            errorData.message ||
+              "Failed to create an account. Please try again."
+          );
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Something went wrong. Please try again.");
+      }
     });
   };
 
@@ -121,15 +152,15 @@ export const RegisterForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                  <div className="relative">
-                    <Input
-                      {...field}
-                      placeholder="******"
-                      type={showPassword ? "text" : "password"}
-                      disabled={transition}
-                       className="pr-[30px]"
-                    />
-                    <IoMdEye
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        placeholder="******"
+                        type={showPassword ? "text" : "password"}
+                        disabled={transition}
+                        className="pr-[30px]"
+                      />
+                      <IoMdEye
                         onClick={() => {
                           setShowPassword(true);
                         }}
@@ -150,7 +181,6 @@ export const RegisterForm = () => {
                 </FormItem>
               )}
             ></FormField>
-            
           </div>
           {success && <FormSuccess message={success} />}
           {error && <FormError message={error} />}
