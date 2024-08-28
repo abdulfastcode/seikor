@@ -29,6 +29,8 @@ import {
   InputOTPSeparator,
 } from "@/components/ui/input-otp";
 import { useForm } from "react-hook-form";
+import { cookies } from "next/headers";
+import { setToken } from "@/app/actions/handle-token";
 
 export const NewVerificationForm = () => {
   const [error, setError] = useState<string | undefined>();
@@ -76,12 +78,14 @@ export const NewVerificationForm = () => {
       return setError("Invalid fields");
     }
 
-    // extracting fields from data
+    // extracting fields from data            
     const { pin } = validateFields.data;
+
+    // console.log("token", token);
 
     try {
       const response = await fetch(
-        "http://65.1.106.246:8000/api/verify-login",
+        "https://65.1.106.246:8443/api/verify-login",
         {
           method: "POST",
           headers: {
@@ -100,10 +104,9 @@ export const NewVerificationForm = () => {
         setSuccessMessage("Verification successful!");
         // store token in local storage
         if (token) {
-          localStorage.setItem("token", token);
+          await setToken(token);
         }
-        // route to dashboard
-        route.push("/user-info");
+        
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Verification failed!");

@@ -25,8 +25,11 @@ import { FormSuccess } from "@/components/form-success";
 
 import { useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export const NewPasswordForm = () => {
+  const router = useRouter();
+
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -56,52 +59,48 @@ export const NewPasswordForm = () => {
       return;
     }
 
-   
+    // handle the OTP and redirect to the login page
 
-      // handle the OTP and redirect to the login page
+    const validateFields = NewPasswordSchema.safeParse(data);
 
-      const validateFields = NewPasswordSchema.safeParse(data);
-
-      if (!validateFields.success) {
-        return setError("Invalid fields");
-      }
-
-      // extracting fields from data
-      const { reEnterPassword } = validateFields.data;
-
-      try {
-        const response = await fetch(
-          "http://65.1.106.246:8000/api/reset-password",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              token: token,
-              new_password: reEnterPassword,
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const resp = await response.json();
-          console.log("success response", resp);
-          setSuccess("Password reset Successful!");
-
-          // route to login
-          // route.push("/");
-        } else {
-          const errorData = await response.json();
-          setError(errorData.message || "Password Reset Failed!");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Something went wrong. Please try again.");
-      }
+    if (!validateFields.success) {
+      return setError("Invalid fields");
     }
-  ;
 
+    // extracting fields from data
+    const { reEnterPassword } = validateFields.data;
+
+    try {
+      const response = await fetch(
+        "https://65.1.106.246:8443/api/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: token,
+            new_password: reEnterPassword,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const resp = await response.json();
+        console.log("success response", resp);
+        setSuccess("Password reset Successful!");
+
+        // route to login
+        // router.push("/auth/login");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Password Reset Failed!");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.");
+    }
+  };
   return (
     <CardWrapper
       headerLabel="Enter a new password"

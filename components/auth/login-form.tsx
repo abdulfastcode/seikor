@@ -62,7 +62,7 @@ export const LoginForm = () => {
         // console.log(hashedPassword);
 
         // Send data to the API using fetch
-        const response = await fetch("http://65.1.106.246:8000/token", {
+        const response = await fetch("https://65.1.106.246:8443/token", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -77,7 +77,7 @@ export const LoginForm = () => {
         if (response.ok) {
           const resp = await response.json();
           console.log("success response", resp);
-          setSuccess("Verification link sent, Please check you mail!");
+          setSuccess("Verification link sent, Please check you mail.");
         } else {
           const errorData = await response.json();
           console.log("errorData", errorData);

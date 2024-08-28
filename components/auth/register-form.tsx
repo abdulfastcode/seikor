@@ -65,7 +65,7 @@ export const RegisterForm = () => {
         // console.log(hashedPassword);
 
         // Send data to the API using fetch
-        const response = await fetch("http://65.1.106.246:8000/api/users", {
+        const response = await fetch("https://65.1.106.246:8443/api/users", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

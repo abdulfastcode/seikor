@@ -52,7 +52,7 @@ export const ResetForm = () => {
       try {
         // Send data to the API using fetch
         const response = await fetch(
-          "http://65.1.106.246:8000/api/password-reset-request",
+          "https://65.1.106.246:8443/api/password-reset-request",
           {
             method: "POST",
             headers: {
@@ -67,7 +67,7 @@ export const ResetForm = () => {
         if (response.ok) {
           const resp = await response.json();
           console.log("success response", resp);
-          setSuccess("Password reset email sent, Please check your mail!");
+          setSuccess("Password reset email sent, Please check your mail.");
         } else {
           const errorData = await response.json();
           setError(errorData.message || "Fail to reset password request!");
